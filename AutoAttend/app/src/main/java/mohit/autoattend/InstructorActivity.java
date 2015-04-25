@@ -17,6 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,7 +57,7 @@ public class InstructorActivity extends ActionBarActivity {
 
             @Override
             public void onItemClick(AdapterView<?> adapter, View arg1,
-                                    int position, long arg3) {
+                                    final int position, long arg3) {
                 // TODO Auto-generated method stub
                 Log.d("Attendance",String.valueOf(position));
 
@@ -72,11 +73,36 @@ public class InstructorActivity extends ActionBarActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
 
-                                Log.e("Attendance","HI");
+                                Log.e("Attendance", "HI");
                                 Dialog f = (Dialog) dialog;
-                                EditText e= (EditText) f.findViewById(R.id.pin);
-                                String text=e.getText().toString();
-                                Log.e("Attendance",text);
+                                EditText e = (EditText) f.findViewById(R.id.pin);
+                                String text = e.getText().toString();
+                                Log.d("Attendance", text);
+                                int enteredPin = Integer.parseInt(text);
+                                Log.d("Attendance", "+" + enteredPin);
+                                Log.d("Attendance", "  " + position);
+                                Log.d("Attendance", data.get(position).password + " ");
+
+                                if (data.get(position).password == enteredPin) {
+
+
+                                    Bundle bundle=new Bundle();
+                                    bundle.putString("course_id",course_id);
+                                    bundle.putString("name",data.get(position).name);
+                                    bundle.putInt("password",data.get(position).password);
+                                    bundle.putInt("year",year);
+                                    bundle.putInt("semseter",semester);
+
+                                    Intent i=new Intent(getApplicationContext(),Attendance.class);
+                                    Log.d("Attendance","Hello");
+                                    i.putExtras(bundle);
+                                    startActivity(i);
+
+
+                                } else {
+                                    Toast toast = Toast.makeText(getApplicationContext(),"Wrong Pin Entered",Toast.LENGTH_LONG);
+                                    toast.show();
+                                }
                                 // sign in the user ...
                             }
                         })

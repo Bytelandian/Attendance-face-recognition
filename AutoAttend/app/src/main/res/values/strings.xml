@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_instructor">InstructorActivity</string>
     <string name="title_activity_attendance">Attendance</string>
+    <string name="folder">/storage/emulated/0/AutoAttend</string>
 
 </resources>

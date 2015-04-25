@@ -1,5 +1,8 @@
 package mohit.autoattend;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -55,6 +59,38 @@ public class InstructorActivity extends ActionBarActivity {
                                     int position, long arg3) {
                 // TODO Auto-generated method stub
                 Log.d("Attendance",String.valueOf(position));
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(InstructorActivity.this);
+                // Get the layout inflater
+                final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(inflater.inflate(R.layout.dialog, null))
+                        // Add action buttons
+                        .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                Log.e("Attendance","HI");
+                                Dialog f = (Dialog) dialog;
+                                EditText e= (EditText) f.findViewById(R.id.pin);
+                                String text=e.getText().toString();
+                                Log.e("Attendance",text);
+                                // sign in the user ...
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                Dialog f = (Dialog) dialog;
+                                f.cancel();
+                            }
+                        });
+              AlertDialog alert =  builder.create();
+                alert.show();
+
+
 
         /*        Bundle bundle = new Bundle();
                 bundle.putString("course_id",data.get(position).course_code);

@@ -27,11 +27,15 @@ public class MainActivity extends ActionBarActivity {
 
     static ArrayList<CourseData> data=new ArrayList<CourseData>();
     ListView results;
+    DatabaseSchema db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        db = new DatabaseSchema(getApplicationContext());
+        Log.d("Attendance,LOL",db.getDatabaseName() );
 
         Log.e("Attendance","Hi");
 

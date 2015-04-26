@@ -44,6 +44,75 @@ public class Attendance extends ActionBarActivity {
     String folderName;
     AlertDialog alert;
     static final int CAPTURE_IMAGE_ACTIVITY=1;
+
+    @Override
+    public void onBackPressed() {
+        Log.d("Attendance","Back Pressed");
+
+//        Boolean close=true;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(Attendance.this);
+        // Get the layout inflater
+        final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+
+        builder.setView(inflater.inflate(R.layout.dialog, null))
+                // Add action buttons
+                .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        Log.e("Attendance", "HI");
+                        Dialog f = (Dialog) dialog;
+                        EditText e = (EditText) f.findViewById(R.id.pin);
+                        String text = e.getText().toString();
+                        Log.d("Attendance", text);
+                        if (!text.equals(""))
+                        {
+
+                            int enteredPin = Integer.parseInt(text);
+                        Log.d("Attendance", "+" + enteredPin);
+
+                        if (password == enteredPin) {
+
+
+
+                            Log.d("Attendance", "Hello");
+
+                            Log.d("Attendance","Correct Pin");
+
+                            ConfirmedClose();
+
+
+
+                        } else {
+                            Toast toast = Toast.makeText(getApplicationContext(),"Wrong Pin Entered",Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                        }else {
+                            Toast toast = Toast.makeText(getApplicationContext(),"Wrong Pin Entered",Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                        // sign in the user ...
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        Dialog f = (Dialog) dialog;
+                        f.cancel();
+                    }
+                });
+        AlertDialog confirmCancel =  builder.create();
+        confirmCancel.show();
+
+    //    super.onBackPressed();
+    }
+
+    private void ConfirmedClose() {
+
+        super.onBackPressed();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -91,6 +160,7 @@ public class Attendance extends ActionBarActivity {
             final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             builder.setView(inflater.inflate(R.layout.loading_dialog, null));
             builder.setTitle("Recognizing Image...");
+            builder.setCancelable(false);;
             alert =  builder.create();
             alert.show();
 
@@ -169,6 +239,15 @@ public class Attendance extends ActionBarActivity {
             }
         });
 
+        Button Cancel = (Button) findViewById(R.id.end);
+
+        Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
 
         Log.d("Attendance",folderName);
         File f=new File(folderName);
@@ -217,10 +296,11 @@ public class Attendance extends ActionBarActivity {
                     {
                         AlertDialog.Builder builder = new AlertDialog.Builder(Attendance.this);
                         builder.setTitle("Select your ID")
+                                .setCancelable(false)
                                 .setItems(res, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
-                                        Log.d("Attendance",which+" ");
-                                        Log.d("Attendance",res[which].toString());
+                                        Log.d("Attendance", which + " ");
+                                        Log.d("Attendance", res[which].toString());
 
                                         // The 'which' argument contains the index position
                                         // of the selected item

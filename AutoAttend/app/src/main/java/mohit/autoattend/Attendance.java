@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import java.util.List;
 
 
 public class Attendance extends ActionBarActivity {
+
+    public MyReceiver receiver;
 
     String course_code,name,currentDate;
     int semester,year,password;
@@ -64,6 +67,13 @@ public class Attendance extends ActionBarActivity {
             }
             photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
+            Intent i= new Intent(this,MarkAttendance.class);
+            Bundle b=new Bundle();
+            b.putString("path",folderName+"/"+count  + ".jpeg");
+            i.putExtras(b);
+            i.putExtra("receiver",receiver);
+            startService(i);
+
             count+=1;
 
         }
@@ -80,6 +90,8 @@ public class Attendance extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance);
 
+        setupServiceReceiver();
+        
         SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy");
         currentDate = sf.format(new Date());
 
@@ -130,6 +142,23 @@ public class Attendance extends ActionBarActivity {
         {
             Log.d("Attendance", mf[i].getAbsolutePath());
         }
+    }
+
+    private void setupServiceReceiver() {
+
+        receiver = new MyReceiver(new Handler());
+        receiver.setReceiver(new MyReceiver.Receiver() {
+
+            @Override
+            public void onReceiveResult(int resultCode, Bundle result) {
+
+                if (resultCode == RESULT_OK) {
+//                    String resultValue = result.getString("resultValue");
+                    Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     @Override

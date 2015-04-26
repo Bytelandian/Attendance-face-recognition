@@ -36,6 +36,7 @@ import java.util.List;
 public class Attendance extends ActionBarActivity {
 
     public MyReceiver receiver;
+    CharSequence[] res;
 
     String course_code,name,currentDate;
     int semester,year,password;
@@ -190,25 +191,43 @@ public class Attendance extends ActionBarActivity {
 
                 if (resultCode == RESULT_OK) {
 //                    String resultValue = result.getString("resultValue");
-                    Log.e("Attendance",result.toString());
-                    JSONArray res=null;
-                    try {
-                        String tres=(String)result.get("result");
-                        res= new JSONArray(tres);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.e("Attendance",res.toString());
+         //           Log.d("Attendance",result.toString());
 
-                    if (res.length()==1)
+
+//                    JSONArray res=null;
+            //        try {
+  //                      String tres=(String)result.get("result");
+    //                    res= new JSONArray(tres);
+      //              } catch (JSONException e) {
+        //                e.printStackTrace();
+          //          }
+              //      Log.e("Attendance",res.toString());
+
+                    res=result.getCharSequenceArray("result");
+
+                    Log.d("Attendance",res.toString());
+
+                    if (res.length==1)
                     {
-                        try {
-                            Toast.makeText(Attendance.this, "Marked Attendance of "+res.get(0).toString(), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                            Toast.makeText(Attendance.this, "Marked Attendance of "+res[0]  , Toast.LENGTH_SHORT).show();
                     }
 //                    Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
+
+                    else
+                    {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Attendance.this);
+                        builder.setTitle("Select your ID")
+                                .setItems(res, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Log.d("Attendance",which+" ");
+                                        Log.d("Attendance",res[which].toString());
+
+                                        // The 'which' argument contains the index position
+                                        // of the selected item
+                                    }
+                                });
+                        builder.create().show();
+                    }
 
                     count+=1;
                 }

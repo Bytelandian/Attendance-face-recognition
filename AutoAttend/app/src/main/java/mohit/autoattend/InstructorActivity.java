@@ -78,28 +78,35 @@ public class InstructorActivity extends ActionBarActivity {
                                 EditText e = (EditText) f.findViewById(R.id.pin);
                                 String text = e.getText().toString();
                                 Log.d("Attendance", text);
-                                int enteredPin = Integer.parseInt(text);
-                                Log.d("Attendance", "+" + enteredPin);
-                                Log.d("Attendance", "  " + position);
-                                Log.d("Attendance", data.get(position).password + " ");
+                                if (!text.equals(""))
+                                {
+                                    int enteredPin = Integer.parseInt(text);
+                                    Log.d("Attendance", "+" + enteredPin);
+                                    Log.d("Attendance", "  " + position);
+                                    Log.d("Attendance", data.get(position).password + " ");
 
-                                if (data.get(position).password == enteredPin) {
-
-
-                                    Bundle bundle=new Bundle();
-                                    bundle.putString("course_id",course_id);
-                                    bundle.putString("name",data.get(position).name);
-                                    bundle.putInt("password",data.get(position).password);
-                                    bundle.putInt("year",year);
-                                    bundle.putInt("semseter",semester);
-
-                                    Intent i=new Intent(getApplicationContext(),Attendance.class);
-                                    Log.d("Attendance","Hello");
-                                    i.putExtras(bundle);
-                                    startActivity(i);
+                                    if (data.get(position).password == enteredPin) {
 
 
-                                } else {
+                                        Bundle bundle=new Bundle();
+                                        bundle.putString("course_id",course_id);
+                                        bundle.putString("name",data.get(position).name);
+                                        bundle.putInt("password",data.get(position).password);
+                                        bundle.putInt("year",year);
+                                        bundle.putInt("semseter",semester);
+
+                                        Intent i=new Intent(getApplicationContext(),Attendance.class);
+                                        Log.d("Attendance","Hello");
+                                        i.putExtras(bundle);
+                                        startActivity(i);
+
+
+                                    } else {
+                                        Toast toast = Toast.makeText(getApplicationContext(),"Wrong Pin Entered",Toast.LENGTH_LONG);
+                                        toast.show();
+                                    }
+
+                                }else {
                                     Toast toast = Toast.makeText(getApplicationContext(),"Wrong Pin Entered",Toast.LENGTH_LONG);
                                     toast.show();
                                 }

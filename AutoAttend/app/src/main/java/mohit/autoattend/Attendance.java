@@ -3,6 +3,7 @@ package mohit.autoattend;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -15,6 +16,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -55,7 +59,7 @@ public class Attendance extends ActionBarActivity {
 
             Log.d("Attendance",photo.getHeight()+" ");
             Log.d("Attendance",photo.getWidth()+"  ");
-            photo = Bitmap.createScaledBitmap(photo, 180, 200, true);
+            photo = Bitmap.createScaledBitmap(photo, 100, 100, true);
             Log.d("Attendance",photo.getHeight()+" ");
             Log.d("Attendance",photo.getWidth()+"  ");
 
@@ -67,6 +71,8 @@ public class Attendance extends ActionBarActivity {
             }
             photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
+            MediaScannerConnection.scanFile(this, new String[]{folderName+"/"+count  + ".jpeg"}, null, null);
+
             Intent i= new Intent(this,MarkAttendance.class);
             Bundle b=new Bundle();
             b.putString("path",folderName+"/"+count  + ".jpeg");
@@ -74,7 +80,7 @@ public class Attendance extends ActionBarActivity {
             i.putExtra("receiver",receiver);
             startService(i);
 
-            count+=1;
+
 
         }
         else
@@ -107,7 +113,22 @@ public class Attendance extends ActionBarActivity {
         Log.d("Attendance",folderName);
 
         File dir=new File(folderName);
-        dir.mkdirs();
+        boolean success = true;
+        if (!dir.exists()) {
+            success = dir.mkdirs();
+        }
+        if (success) {
+            Log.d("Attendance","Success");
+            // Do something on success
+        } else {
+            Log.d("Attendance","Failure");
+            // Do something else on failure
+        }
+
+
+   //     dir.mkdirs();
+
+    //    MediaScannerConnection.scanFile (this, new String[]{folderName.toString()}, null, null);
 
      /*   Camera camera = Camera.open();
         Camera.Parameters params = camera.getParameters();
@@ -154,7 +175,27 @@ public class Attendance extends ActionBarActivity {
 
                 if (resultCode == RESULT_OK) {
 //                    String resultValue = result.getString("resultValue");
+                    Log.e("Attendance",result.toString());
+                    JSONArray res=null;
+                    try {
+                        String tres=(String)result.get("result");
+                        res= new JSONArray(tres);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.e("Attendance",res.toString());
+
+                    if (res.length()==1)
+                    {
+                        try {
+                            Toast.makeText(Attendance.this, "Marked Attendance of "+res.get(0).toString(), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
+
+                    count+=1;
                 }
 
             }

@@ -32,6 +32,10 @@
             android:name=".MarkAttendance"
             android:exported="false" >
         </service>
+        <service
+            android:name=".ReadDataService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

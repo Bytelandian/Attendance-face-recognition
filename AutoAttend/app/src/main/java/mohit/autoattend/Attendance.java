@@ -1,5 +1,8 @@
 package mohit.autoattend;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -10,10 +13,12 @@ import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -36,6 +41,7 @@ public class Attendance extends ActionBarActivity {
     int semester,year,password;
     int count=0;
     String folderName;
+    AlertDialog alert;
     static final int CAPTURE_IMAGE_ACTIVITY=1;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -47,8 +53,8 @@ public class Attendance extends ActionBarActivity {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY && resultCode == RESULT_OK) {
 
             Log.d("Attendance", "Pic saved");
-            Toast toast = Toast.makeText(getApplicationContext(),"Processing Image!!!",Toast.LENGTH_LONG);
-            toast.show();
+  //          Toast toast = Toast.makeText(getApplicationContext(),"Processing Image!!!",Toast.LENGTH_LONG);
+    //        toast.show();
             Log.d("Attendance", "Pic saved");
 
             Bitmap photo = (Bitmap) data.getExtras().get("data");
@@ -79,6 +85,13 @@ public class Attendance extends ActionBarActivity {
             i.putExtras(b);
             i.putExtra("receiver",receiver);
             startService(i);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(Attendance.this);
+            final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            builder.setView(inflater.inflate(R.layout.loading_dialog, null));
+            builder.setTitle("Recognizing Image...");
+            alert =  builder.create();
+            alert.show();
 
 
 
@@ -173,6 +186,8 @@ public class Attendance extends ActionBarActivity {
             @Override
             public void onReceiveResult(int resultCode, Bundle result) {
 
+                alert.hide();
+
                 if (resultCode == RESULT_OK) {
 //                    String resultValue = result.getString("resultValue");
                     Log.e("Attendance",result.toString());
@@ -193,7 +208,7 @@ public class Attendance extends ActionBarActivity {
                             e.printStackTrace();
                         }
                     }
-                    Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
 
                     count+=1;
                 }

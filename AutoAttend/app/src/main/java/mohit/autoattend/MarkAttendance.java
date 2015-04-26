@@ -14,7 +14,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -42,7 +44,7 @@ public class MarkAttendance extends IntentService {
 
             Log.d("Attendance",path);
 
-
+/*
             int inRow = 0, inCol = 0;
             int[] inImage = null;						// mn x 1
             double[] meanImage = null, diff = null;		// mn x 1
@@ -110,16 +112,99 @@ public class MarkAttendance extends IntentService {
                         projImages[j][i] = Double.parseDouble(t4[i]);
                 }
 
+
                 train_no = Integer.parseInt(trainInfoReader.readLine());
-                String[] mapping = new String[train_no+1];
+                Person[] person = new Person[(train_no+1)];
 
                 for(i=1; i<=train_no; i++)
                 {
-                    String[] t1 = trainInfoReader.readLine().split("--->",2);
-                    mapping[i] = t1[1];
+                    String[] t1 = trainInfoReader.readLine().split("->",2);
+//				System.out.println(t1[0] + " " + t1[1]);
+                    person[i] = new Person(t1[1], Integer.parseInt(t1[0]));
+//				person[i].name = t1[1];
+//				person[i].id = Integer.parseInt(t1[0]);
                 }
+*/
 
-            } catch (IOException e) {
+
+            Log.d("Attendance","Read Training Models");
+
+//                File file = new File("E:\\Educational\\Study\\sem6\\Contemporary computing platforms\\check\\PCA_based Face Recognition System\\PCA_based Face Recognition System\\new\\TestDatabase\\3.jpg");
+            Log.d("Attendance","Reading Image");
+                Bitmap img;
+                img = BitmapFactory.decodeFile(path);//"/storage/emulated/0/AutoAttend/2.jpg");// ImageIO.read(file);
+                Attendance.data.inImage = new int[img.getHeight() * img.getWidth()];
+                int[] rgb;
+
+                int counter = 0;
+                for(int i1 = 0; i1 < img.getHeight(); i1++){
+                    for(int j1 = 0; j1 < img.getWidth(); j1++){
+                        rgb = getPixels(img, j1, i1);
+                        Attendance.data.inImage[counter] = rgb[0];
+                        counter++;
+                    }
+                }
+            Attendance.data.inRow = img.getHeight();
+            Attendance.data.inCol = img.getWidth();
+
+            Attendance.data.diff = new double[Attendance.data.inRow*Attendance.data.inCol];
+            difference(Attendance.data.diff, Attendance.data.meanImage, Attendance.data.inImage, Attendance.data.inRow*Attendance.data.inCol);
+
+
+
+            Attendance.data.projTestImg = new double[Attendance.data.eCol];
+            conj_multiply(Attendance.data.eigenFace, Attendance.data.eRow, Attendance.data.eCol, Attendance.data.diff, Attendance.data.dRow, Attendance.data.projTestImg);
+            Attendance.data.train_no = Attendance.data.eCol ;
+
+
+            Attendance.data.eucDist = new double[Attendance.data.train_no];
+            Data[] distance = new Data[Attendance.data.train_no];
+
+            euc_dist(Attendance.data.train_no, Attendance.data.projImages, Attendance.data.projRow, Attendance.data.projCol, Attendance.data.projTestImg, Attendance.data.projTestRow, Attendance.data.projTestCol, Attendance.data.eucDist, distance);
+
+            for(int i=0;i<Attendance.data.train_no;i++)
+	    {
+	    	System.out.println(distance[i].dist + " " + distance[i].id);
+	    }
+
+
+                Arrays.sort(distance, new Distance());
+
+	    for(int i=0;i<Attendance.data.train_no;i++)
+	    {
+	    	System.out.println(distance[i].dist + " " + distance[i].id + "  "+ Attendance.data.person[distance[i].id].name);
+	    }
+
+
+//		int index = get_min_index(eucDist, train_no);
+            System.out.println(" Closest matching index is : "+(distance[0].id));
+
+//            JSONArray res=new JSONArray();
+
+            List<String> res = new ArrayList<String>();
+
+
+      //      CharSequence[] res=new CharSequence[0];
+
+            for (int i=0;i<Attendance.data.train_no;i++)
+            {
+                if (!res.contains(Attendance.data.person[distance[i].id].name))
+                res.add(Attendance.data.person[distance[i].id].name);
+//                res.put(distance[i].id);
+                if (distance[i].dist / distance[0].dist > 10)
+                    break;
+            }
+            final CharSequence[] returnResult = res.toArray(new CharSequence[res.size()]);
+
+            Bundle b=new Bundle();
+
+//            Log.e("Attendance",returnResult.toString());
+            b.putCharSequenceArray("result",returnResult);
+
+            Log.d("Attendance", MainActivity.RESULT_OK+ "  ");
+            receiver.send(MainActivity.RESULT_OK,b);
+
+      /*      } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 try {
@@ -130,75 +215,7 @@ public class MarkAttendance extends IntentService {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-            }
-
-            Log.d("Attendance","Read Training Models");
-
-//                File file = new File("E:\\Educational\\Study\\sem6\\Contemporary computing platforms\\check\\PCA_based Face Recognition System\\PCA_based Face Recognition System\\new\\TestDatabase\\3.jpg");
-            Log.d("Attendance","Reading Image");
-                Bitmap img;
-                img = BitmapFactory.decodeFile(path);//"/storage/emulated/0/AutoAttend/2.jpg");// ImageIO.read(file);
-                inImage = new int[img.getHeight() * img.getWidth()];
-                int[] rgb;
-
-                int counter = 0;
-                for(int i1 = 0; i1 < img.getHeight(); i1++){
-                    for(int j1 = 0; j1 < img.getWidth(); j1++){
-                        rgb = getPixels(img, j1, i1);
-                        inImage[counter] = rgb[0];
-                        counter++;
-                    }
-                }
-                inRow = img.getHeight();
-                inCol = img.getWidth();
-
-            diff = new double[inRow*inCol];
-            difference(diff, meanImage, inImage, inRow*inCol);
-
-
-
-            projTestImg = new double[eCol];
-            conj_multiply(eigenFace, eRow, eCol, diff, dRow, projTestImg);
-            train_no = eCol ;
-
-
-            eucDist = new double[train_no];
-            Data[] distance = new Data[train_no];
-
-            euc_dist(train_no, projImages, projRow, projCol, projTestImg, projTestRow, projTestCol, eucDist, distance);
-
-            for(i=0;i<train_no;i++)
-	    {
-	    	System.out.println(distance[i].dist + " " + distance[i].id);
-	    }
-
-
-                Arrays.sort(distance, new Distance());
-
-	    for(i=0;i<train_no;i++)
-	    {
-	    	System.out.println(distance[i].id);
-	    }
-
-
-//		int index = get_min_index(eucDist, train_no);
-            System.out.println(" Closest matching index is : "+(distance[0].id));
-
-            JSONArray res=new JSONArray();
-
-            for (i=0;i<train_no;i++)
-            {
-                res.put(distance[i].id);
-                if (distance[i].dist / distance[i].dist > 2)
-                    break;
-            }
-
-            Bundle b=new Bundle();
-            b.putString("result",res.toString());
-
-            Log.e("Attendance", MainActivity.RESULT_OK+ "  ");
-            receiver.send(MainActivity.RESULT_OK,b);
-
+            }*/
         }
     }
 

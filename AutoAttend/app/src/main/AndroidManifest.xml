@@ -27,6 +27,11 @@
             android:name=".Attendance"
             android:label="@string/title_activity_attendance" >
         </activity>
+
+        <service
+            android:name=".MarkAttendance"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

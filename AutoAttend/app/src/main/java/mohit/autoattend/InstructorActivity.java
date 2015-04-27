@@ -47,6 +47,7 @@ public class InstructorActivity extends ActionBarActivity {
         course_id=bundle.getString("course_id");
         year=bundle.getInt("year");
         semester=bundle.getInt("semester");
+
         Log.d("Attendance", bundle.getString("course_id"));
         Log.d("Attendance", bundle.getString("course_id"));
 
@@ -69,6 +70,7 @@ public class InstructorActivity extends ActionBarActivity {
                 // Pass null as the parent view because its going in the dialog layout
                 builder.setView(inflater.inflate(R.layout.dialog, null))
                         // Add action buttons
+                        .setTitle("Enter Pin...")
                         .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -93,7 +95,8 @@ public class InstructorActivity extends ActionBarActivity {
                                         bundle.putString("name",data.get(position).name);
                                         bundle.putInt("password",data.get(position).password);
                                         bundle.putInt("year",year);
-                                        bundle.putInt("semseter",semester);
+                                        bundle.putInt("semester",semester);
+                                        Log.d("Semester-put",semester+" ");
 
                                         Intent i=new Intent(getApplicationContext(),Attendance.class);
                                         Log.d("Attendance","Hello");

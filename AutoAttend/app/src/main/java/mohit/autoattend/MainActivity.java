@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,19 +24,34 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity{
 
     static ArrayList<CourseData> data=new ArrayList<CourseData>();
     ListView results;
     DatabaseSchema db;
+    public static JSONArray students ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+         try {
+             students =(new JSONArray("[{\"id\":\"2012CSB1012\"},{\"id\":\"2012CSB1020\"},{\"id\":\"2012CSB1031\"},{\"id\":\"2012CSB1032\"},{\"id\":\"2012CSB1076\"},{\"id\":\"2012CSB1089\"}]"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         db = new DatabaseSchema(getApplicationContext());
         Log.d("Attendance,LOL",db.getDatabaseName() );
+
+        Button syncButton = (Button) findViewById(R.id.sync);
+        syncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                db.syncData();
+            }
+        });
 
         Log.e("Attendance","Hi");
 
@@ -53,7 +69,8 @@ public class MainActivity extends ActionBarActivity {
 
                 Bundle bundle = new Bundle();
                 bundle.putString("course_id",data.get(position).course_code);
-                bundle.putInt("semester",data.get(position).semester);
+                bundle.putInt("semester", data.get(position).semester);
+                Log.d("Semester-put",data.get(position).semester+" ");
                 bundle.putInt("year",data.get(position).year);
                 bundle.putString("teaching",data.get(position).teaches.toString());
 
@@ -85,6 +102,7 @@ public class MainActivity extends ActionBarActivity {
         for (int i=0;i<j.length();i++)
         {
             Log.e("Attendance",i+"asd");
+            Log.e("Attendance-JSON",j.get(i).toString());
 
                 data.add(new CourseData((JSONObject)j.get(i)));
 
@@ -120,6 +138,7 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     public class EfficientAdapter extends BaseAdapter {
 

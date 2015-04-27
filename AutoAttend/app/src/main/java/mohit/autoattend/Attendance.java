@@ -24,7 +24,9 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -35,19 +37,59 @@ import java.util.List;
 
 public class Attendance extends ActionBarActivity {
 
+/*
+    public static int inRow = 0, inCol = 0;
+    public static int[] inImage = null;                        // mn x 1
+    public static double[] meanImage = null, diff = null;        // mn x 1
+    public static int mnsize = 0;
+
+    public static double[][] eigenFace = null;                // mn x p-1
+    public static int eRow = 0, eCol = 0;
+
+    public static double[] projTestImg = null;                // p-1 x 1
+
+    public static double[][] projImages = null;                // p-1 x train_no
+    public static int projRow = 0, projCol = 0;
+
+    public static double[] eucDist = null;
+
+    public static Person[] person = null;
+
+    public static int dRow = 0;
+    public static int train_no = 1;
+    public  static int projTestRow = 0, projTestCol = 0;
+
+    public static BufferedReader trainInfoReader = null;
+    public  static BufferedReader mReader = null;
+    public static BufferedReader eigenReader = null;
+    public static BufferedReader projImgReader = null;
+
+    public static  String line;
+   public static int i, j;
+*/
+
+
+
+
+
     public MyReceiver receiver;
+    JSONArray tempstudentList,studentAttendance;
+  //  public MyDataReceiver datareceiver;
     CharSequence[] res;
+
+//    public static ReadData data;
 
     String course_code,name,currentDate;
     int semester,year,password;
     int count=0;
     String folderName;
     AlertDialog alert;
+//    AlertDialog alertData;
     static final int CAPTURE_IMAGE_ACTIVITY=1;
 
     @Override
     public void onBackPressed() {
-        Log.d("Attendance","Back Pressed");
+        Log.d("Attendance", "Back Pressed");
 
 //        Boolean close=true;
 
@@ -56,6 +98,7 @@ public class Attendance extends ActionBarActivity {
         final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
 
         builder.setView(inflater.inflate(R.layout.dialog, null))
+                .setTitle("Enter Pin...")
                 // Add action buttons
                 .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
@@ -109,6 +152,36 @@ public class Attendance extends ActionBarActivity {
     }
 
     private void ConfirmedClose() {
+
+        DatabaseSchema db = new DatabaseSchema(getApplicationContext());
+
+        for (int i=0;i<studentAttendance.length();i++)
+        {
+            JSONObject temp=null;
+            try {
+                temp=(JSONObject) studentAttendance.get(i);
+                Bundle b=new Bundle();
+                Log.e("Attendance",course_code);
+                Log.e("Attendance",currentDate);
+                Log.e("Attendance",semester+" ");
+                Log.e("Attendance",year+" ");
+                Log.e("Attendance",temp.get("id").toString());
+                Log.e("Attendance",temp.get("attendance").toString());
+
+
+                b.putString("course_id",course_code);
+                b.putString("date", currentDate);
+                b.putInt("semester", semester);
+                b.putInt("year", year);
+                b.putString("id",temp.get("id").toString());
+                b.putInt("attendance", Integer.valueOf(temp.get("attendance").toString()));
+                db.insert(b);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
 
         super.onBackPressed();
     }
@@ -180,7 +253,26 @@ public class Attendance extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance);
 
+        try {
+            Log.d("LOL",MainActivity.students.toString());
+            tempstudentList = MainActivity.students;
+            studentAttendance = new JSONArray();
+            for (int i=0;i<tempstudentList.length();i++)
+            {
+                JSONObject temp = new JSONObject();
+                temp.put("id",((JSONObject)tempstudentList.get(i)).getString("id"));
+                temp.put("attendance",0);
+                studentAttendance.put(temp);
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("CompleteList",studentAttendance.toString());
+
         setupServiceReceiver();
+        //setupDataReceiver();
         
         SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy");
         currentDate = sf.format(new Date());
@@ -189,6 +281,7 @@ public class Attendance extends ActionBarActivity {
         course_code = bundle.getString("course_id");
         year=bundle.getInt("year");
         semester=bundle.getInt("semester");
+        Log.d("Semester-put",semester+" ");
         name=bundle.getString("name");
         password=bundle.getInt("password");
 
@@ -209,30 +302,16 @@ public class Attendance extends ActionBarActivity {
             // Do something else on failure
         }
 
-
-   //     dir.mkdirs();
-
-    //    MediaScannerConnection.scanFile (this, new String[]{folderName.toString()}, null, null);
-
-     /*   Camera camera = Camera.open();
-        Camera.Parameters params = camera.getParameters();
-        List<Camera.Size> sizes = params.getSupportedPictureSizes();
-        for (int i=0;i<sizes.size();i++)
-        {
-            Log.d("Attendance",sizes.get(i)+" ");
-        } */
-
-
         Button takeAttendance = (Button) findViewById(R.id.attendance);
 
         takeAttendance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-  //              File file = new File(folderName+"/"+count+".jpg");
+                //              File file = new File(folderName+"/"+count+".jpg");
 //                Uri outputFileUri = Uri.fromFile(file);
                 Intent intent = new Intent(
                         android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-         //       intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, outputFileUri);
+                //       intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, outputFileUri);
 
                 startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY);
 
@@ -256,7 +335,64 @@ public class Attendance extends ActionBarActivity {
         {
             Log.d("Attendance", mf[i].getAbsolutePath());
         }
+
+
+
+        //     dir.mkdirs();
+
+    //    MediaScannerConnection.scanFile (this, new String[]{folderName.toString()}, null, null);
+
+     /*   Camera camera = Camera.open();
+        Camera.Parameters params = camera.getParameters();
+        List<Camera.Size> sizes = params.getSupportedPictureSizes();
+        for (int i=0;i<sizes.size();i++)
+        {
+            Log.d("Attendance",sizes.get(i)+" ");
+        } */
+
+//        setData();
+/*        AlertDialog.Builder builder = new AlertDialog.Builder(Attendance.this);
+        final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        builder.setView(inflater.inflate(R.layout.loading_dialog, null));
+        builder.setTitle("Loading Data...");
+        builder.setCancelable(false);;
+        alertData =  builder.create();
+        alertData.show();
+
+        Intent i= new Intent(this,ReadDataService.class);
+        i.putExtra("receiver",datareceiver);
+        startService(i);
+        startService(i);
+*/
     }
+
+  /*  private void setupDataReceiver() {
+
+        datareceiver = new MyDataReceiver(new Handler());
+        datareceiver.setReceiver(new MyDataReceiver.Receiver() {
+
+            @Override
+            public void onReceiveResult(int resultCode, Bundle result) {
+
+                Log.e("Here","Completed");
+                alertData.hide();
+
+                if (resultCode == RESULT_OK) {
+
+
+                }
+
+            }
+        });
+
+
+    }
+*/
+  //  private void setData() {
+
+//        data=new ReadData();
+
+    //}
 
     private void setupServiceReceiver() {
 
@@ -270,25 +406,28 @@ public class Attendance extends ActionBarActivity {
 
                 if (resultCode == RESULT_OK) {
 //                    String resultValue = result.getString("resultValue");
-         //           Log.d("Attendance",result.toString());
+                    //           Log.d("Attendance",result.toString());
 
 
 //                    JSONArray res=null;
-            //        try {
-  //                      String tres=(String)result.get("result");
-    //                    res= new JSONArray(tres);
-      //              } catch (JSONException e) {
-        //                e.printStackTrace();
-          //          }
-              //      Log.e("Attendance",res.toString());
+                    //        try {
+                    //                      String tres=(String)result.get("result");
+                    //                    res= new JSONArray(tres);
+                    //              } catch (JSONException e) {
+                    //                e.printStackTrace();
+                    //          }
+                    //      Log.e("Attendance",res.toString());
 
                     res=result.getCharSequenceArray("result");
 
                     Log.d("Attendance",res.toString());
+                    Log.d("Attendance", res[0].toString());
+
 
                     if (res.length==1)
                     {
-                            Toast.makeText(Attendance.this, "Marked Attendance of "+res[0]  , Toast.LENGTH_SHORT).show();
+                        markAttendance(res[0]);
+                        Toast.makeText(Attendance.this, "Marked Attendance of "+res[0]  , Toast.LENGTH_SHORT).show();
                     }
 //                    Toast.makeText(Attendance.this, "YOOOOOO", Toast.LENGTH_SHORT).show();
 
@@ -300,6 +439,7 @@ public class Attendance extends ActionBarActivity {
                                 .setItems(res, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         Log.d("Attendance", which + " ");
+                                        markAttendance(res[which]);
                                         Log.d("Attendance", res[which].toString());
 
                                         // The 'which' argument contains the index position
@@ -315,6 +455,37 @@ public class Attendance extends ActionBarActivity {
             }
         });
     }
+
+    private void markAttendance(CharSequence re) {
+
+//        JSONArray a=studentAttendance;
+
+        Log.d("LOLAttendance",studentAttendance.toString());
+
+        for (int i=0;i<studentAttendance.length();i++)
+        {
+            try {
+                JSONObject temp=(JSONObject)studentAttendance.get(i);
+                JSONObject marked=null;
+                Log.d("Attendance",temp.get("id").toString());
+                if (temp.get("id").equals(re))
+                {
+                    marked=new JSONObject();
+                    marked.put("id",re.toString());
+                    marked.put("attendance",1);
+                    studentAttendance.remove(i);
+                    studentAttendance.put(marked);
+                    break;
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

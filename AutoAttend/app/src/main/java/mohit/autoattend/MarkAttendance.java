@@ -44,7 +44,7 @@ public class MarkAttendance extends IntentService {
 
             Log.d("Attendance",path);
 
-/*
+
             int inRow = 0, inCol = 0;
             int[] inImage = null;						// mn x 1
             double[] meanImage = null, diff = null;		// mn x 1
@@ -124,7 +124,7 @@ public class MarkAttendance extends IntentService {
 //				person[i].name = t1[1];
 //				person[i].id = Integer.parseInt(t1[0]);
                 }
-*/
+
 
 
             Log.d("Attendance","Read Training Models");
@@ -133,36 +133,36 @@ public class MarkAttendance extends IntentService {
             Log.d("Attendance","Reading Image");
                 Bitmap img;
                 img = BitmapFactory.decodeFile(path);//"/storage/emulated/0/AutoAttend/2.jpg");// ImageIO.read(file);
-                Attendance.data.inImage = new int[img.getHeight() * img.getWidth()];
+                inImage = new int[img.getHeight() * img.getWidth()];
                 int[] rgb;
 
                 int counter = 0;
                 for(int i1 = 0; i1 < img.getHeight(); i1++){
                     for(int j1 = 0; j1 < img.getWidth(); j1++){
                         rgb = getPixels(img, j1, i1);
-                        Attendance.data.inImage[counter] = rgb[0];
+                        inImage[counter] = rgb[0];
                         counter++;
                     }
                 }
-            Attendance.data.inRow = img.getHeight();
-            Attendance.data.inCol = img.getWidth();
+                inRow = img.getHeight();
+                inCol = img.getWidth();
 
-            Attendance.data.diff = new double[Attendance.data.inRow*Attendance.data.inCol];
-            difference(Attendance.data.diff, Attendance.data.meanImage, Attendance.data.inImage, Attendance.data.inRow*Attendance.data.inCol);
-
-
-
-            Attendance.data.projTestImg = new double[Attendance.data.eCol];
-            conj_multiply(Attendance.data.eigenFace, Attendance.data.eRow, Attendance.data.eCol, Attendance.data.diff, Attendance.data.dRow, Attendance.data.projTestImg);
-            Attendance.data.train_no = Attendance.data.eCol ;
+            diff = new double[inRow*inCol];
+            difference(diff, meanImage, inImage, inRow*inCol);
 
 
-            Attendance.data.eucDist = new double[Attendance.data.train_no];
-            Data[] distance = new Data[Attendance.data.train_no];
 
-            euc_dist(Attendance.data.train_no, Attendance.data.projImages, Attendance.data.projRow, Attendance.data.projCol, Attendance.data.projTestImg, Attendance.data.projTestRow, Attendance.data.projTestCol, Attendance.data.eucDist, distance);
+            projTestImg = new double[eCol];
+            conj_multiply(eigenFace, eRow, eCol, diff, dRow, projTestImg);
+            train_no = eCol ;
 
-            for(int i=0;i<Attendance.data.train_no;i++)
+
+            eucDist = new double[train_no];
+            Data[] distance = new Data[train_no];
+
+            euc_dist(train_no, projImages, projRow, projCol, projTestImg, projTestRow, projTestCol, eucDist, distance);
+
+            for(i=0;i<train_no;i++)
 	    {
 	    	System.out.println(distance[i].dist + " " + distance[i].id);
 	    }
@@ -170,9 +170,9 @@ public class MarkAttendance extends IntentService {
 
                 Arrays.sort(distance, new Distance());
 
-	    for(int i=0;i<Attendance.data.train_no;i++)
+	    for(i=0;i<train_no;i++)
 	    {
-	    	System.out.println(distance[i].dist + " " + distance[i].id + "  "+ Attendance.data.person[distance[i].id].name);
+	    	System.out.println(distance[i].dist + " " + distance[i].id + "  "+ person[distance[i].id].name);
 	    }
 
 
@@ -186,15 +186,18 @@ public class MarkAttendance extends IntentService {
 
       //      CharSequence[] res=new CharSequence[0];
 
-            for (int i=0;i<Attendance.data.train_no;i++)
+            for (i=0;i<train_no;i++)
             {
-                if (!res.contains(Attendance.data.person[distance[i].id].name))
-                res.add(Attendance.data.person[distance[i].id].name);
+                if (!res.contains(person[distance[i].id].name))
+                res.add(person[distance[i].id].name);
+
+
 //                res.put(distance[i].id);
                 if (distance[i].dist / distance[0].dist > 10)
                     break;
             }
             final CharSequence[] returnResult = res.toArray(new CharSequence[res.size()]);
+            Log.d("Attendance",returnResult.toString());
 
             Bundle b=new Bundle();
 
@@ -204,7 +207,7 @@ public class MarkAttendance extends IntentService {
             Log.d("Attendance", MainActivity.RESULT_OK+ "  ");
             receiver.send(MainActivity.RESULT_OK,b);
 
-      /*      } catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 try {
@@ -215,7 +218,7 @@ public class MarkAttendance extends IntentService {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-            }*/
+            }
         }
     }
 
